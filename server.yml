@@ -1,0 +1,6 @@
+---
+- name: Add the user with password and key
+  hosts: web
+  become: yes
+  roles:
+    - { role: adduser, tags: [addusers] }

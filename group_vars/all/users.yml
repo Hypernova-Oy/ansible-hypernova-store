@@ -1,0 +1,7 @@
+users:
+  - name: root
+    groups:
+      - root
+      - www-data
+    keys:
+      - "{{ lookup('file', '~/.ssh/id_rsa') }}"
