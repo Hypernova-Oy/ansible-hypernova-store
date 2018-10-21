@@ -1,0 +1,10 @@
+---
+- name: Allow sshaccess group to have passwordless sudo
+  lineinfile:
+    dest: /etc/sudoers
+    line: "{{ item.line }}"
+    insertafter: "{{ item.insertafter }}"
+    validate: 'visudo -cf %s'
+  with_items:
+    - line: '%sshaccess ALL=(ALL:ALL) NOPASSWD: ALL'
+      insertafter: "^#?%sudo"

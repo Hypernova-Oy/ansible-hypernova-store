@@ -1,6 +1,8 @@
 ---
 - name: Add the user with password and key
   hosts: web
-  become: yes
+  #become: yes
   roles:
     - { role: adduser, tags: [addusers] }
+    - { role: sshd, tags: [sshd] }
+    - { role: sudo, tags: [sudo] }

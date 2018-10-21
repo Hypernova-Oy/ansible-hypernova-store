@@ -8,11 +8,10 @@ Date: {{ ansible_date_time.date }}
 =========================================
 
 SSH:
-
-{% for h in groups['{{hostsgroup}}'] %}
+{% for h in ansible_play_batch %}
 ssh -i ~/ansible_users_keys/{{ new_user_name_global }}_id_rsa {{ new_user_name_global }}@{{ hostvars[h].ansible_host }}
 {% endfor %}
 
-{% for h in groups['web'] %}
+{% for h in ansible_play_batch %}
 ssh -i ~/ansible_users_keys/{{ new_user_name_global }}_id_rsa {{ new_user_name_global }}@{{ hostvars[h].ansible_nodename }}
 {% endfor %}

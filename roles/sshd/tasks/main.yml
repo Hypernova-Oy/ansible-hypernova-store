@@ -1,0 +1,51 @@
+﻿---
+- name: Ensure group ssh exists
+  group:
+    name: sshaccess
+    state: present
+  
+- name: SSH update ssh_config
+  lineinfile:
+    dest: /etc/ssh/ssh_config
+    line: "{{ item.line }}"
+    insertafter: "{{ item.insertafter }}"
+  with_items:
+    - line: "    Protocol 2"
+      insertafter: EOF
+    - line: "    CompressionLevel 1"
+      insertafter: EOF
+    - line: "    Compression yes"
+      insertafter: EOF
+
+- name: SSH update sshd_config disallow root login
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: "{{item.regexp}}"
+    line: "{{item.line}}"
+    state: present
+  with_items:
+    - regexp: "^PermitRootLogin"
+      line: "PermitRootLogin no"
+    - regexp: "^#?IgnoreUserKnownHosts"
+      line: "IgnoreUserKnownHosts no"
+    # - regexp: "^^#?PasswordAuthentication"
+    #   line: "PasswordAuthentication no"
+
+- name: Harden sshd configuration
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    line: "{{ item.line }}"
+    insertafter: "{{ item.insertafter }}"
+  with_items:
+    - line: "GatewayPorts no"
+      insertafter: EOF
+    - line: "AllowTcpForwarding yes"
+      insertafter: EOF
+    - line: "AllowGroups sshaccess"
+      insertafter: EOF
+
+- name: Restart sshd
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: sshd

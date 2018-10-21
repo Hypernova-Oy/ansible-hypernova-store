@@ -1,29 +1,24 @@
 # Add each host to the [production] group and to a "type" group such as [web] or [db].
 # List each machine only once per [group], even if it will host multiple sites.
 
-# localhost              ansible_connection=local
-# other1.example.com     ansible_connection=ssh        ansible_user=mpdehaan
-# Wordpress Nginx PHP-FPM
-
 #[all:vars]
 #user_fourword_global="{{ user_fourword.stdout }}"
 
 [local:vars]
 ansible_user=rostyslav
 ansible_connection=local
+gather_facts=no
 
 [local]
 localhost ansible_host=127.0.0.1
 
 [web]
-#ansible.test ansible_host=192.168.182.129 ansible_user=root
-#ansible-test.u16 ansible_host=192.168.182.128 ansible_user=root
-#ansible-test.u18 ansible_host=192.168.182.129 ansible_user=root
 ansible-test.u16 ansible_host=192.168.182.128
-ansible-test.u18 ansible_host=192.168.182.129
+#ansible-test.u18 ansible_host=192.168.182.129
 
 [web:vars]
 ansible_user=ansiblec4vhk
 ansible_become=yes
-ansible_become_method=sudo 
+ansible_become_method=sudo
 #ansible_become_pass='{{ my_cluser_sudo_pass }}'
+#ansible_ssh_private_key_file=
