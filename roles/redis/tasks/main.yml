@@ -1,0 +1,99 @@
+﻿---
+- include_tasks: common/tasks/get_memory.yml
+
+- name: Install Redis server
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+    - libjemalloc1
+    - redis
+    - redis-server
+    - redis-tools
+
+- name: Delete file redis.conf
+  file:
+    path: "/etc/redis/redis.conf"
+    state: absent
+
+- name: Create redis.conf"
+  template: 
+    src: redis.j2
+    dest: "/etc/redis/redis.conf"
+
+- name: Remove useless packages from the cache
+  apt:
+    autoclean: yes
+
+- name: Remove dependencies that are no longer required
+  apt:
+    autoremove: yes
+
+# - name: sysctl.conf update for Redis requirements
+#   lineinfile:
+#     dest: /etc/sysctl.conf
+#     line: "{{ item.line }}"
+#     insertafter: "{{ item.insertafter }}"
+#   with_items:
+#     - line: "net.core.somaxconn = 1024"
+#       insertafter: EOF
+#     - line: "vm.overcommit_memory = 1"
+#       insertafter: EOF
+
+# - name: sysctl.conf update for Redis requirements
+#   sysctl:
+#     name: net.core.somaxconn
+#     value: 1024
+#     sysctl_set: yes
+#     state: present
+#     reload: yes
+
+- name: sysctl.conf update for Redis requirements
+  sysctl:
+    name: "{{item.name}}"
+    value: "{{item.value}}"
+    sysctl_set: yes
+    state: present
+    reload: yes
+  with_items:
+    - name: "net.core.somaxconn"
+      value: 1024
+    - name: "vm.overcommit_memory"
+      value: 1
+
+- name: Create disable-thp.service
+  template: 
+    src: disable-thp.service.j2
+    dest: "/etc/systemd/system/disable-thp.service"
+
+- name: Force systemd to reread configs
+  systemd:
+    daemon_reload: yes
+
+- name: Enable service disable-thp and ensure it is not masked
+  systemd:
+    name: disable-thp
+    enabled: yes
+    masked: no
+
+- name: Restart disable-thp
+  systemd:
+    state: restarted
+    name: disable-thp
+
+- name: Restart redis-server
+  systemd:
+    state: restarted
+    name: redis-server
+
+# - name: ensure file exists
+#   copy:
+#     content: ""
+#     dest: "/var/run/redis/redis-server.pid"
+#     force: no
+#     group: redis
+#     owner: redis
+#     mode: 0660

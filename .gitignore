@@ -32,5 +32,6 @@ override.tf.json
 #
 # !example_override.tf
 
+.history
 
 # End of https://www.gitignore.io/api/ansible,terraform

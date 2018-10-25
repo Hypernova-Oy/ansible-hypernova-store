@@ -6,3 +6,6 @@
     - { role: adduser, tags: [addusers] }
     - { role: sshd, tags: [sshd] }
     - { role: sudo, tags: [sudo] }
+    - { role: apt_php, tags: [php] }
+    - { role: php_configure, tags: [php_configure] }
+    - { role: redis, tags: [redis] }

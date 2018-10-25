@@ -1,0 +1,61 @@
+﻿---
+- name: Gathering facts on number CPUs from the new server
+  setup:
+    filter: ansible_processor_vcpus
+
+- name: Gathering facts on number CPUs from the new server
+  setup:
+    filter: ansible_memtotal_mb
+
+- name: Dlete file pool config *.conf
+  find:
+    paths: /etc/php/7.2/fpm/pool.d/
+    patterns: "*.conf"
+  register: files_to_delete
+
+- name: Dlete file pool config *.conf
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  with_items: "{{ files_to_delete.files }}"
+
+- name: Create PHP-FPM production pool
+  template: 
+    src: production.j2
+    dest: "/etc/php/7.2/fpm/pool.d/production.conf"
+
+- name: Delete file opcache.ini
+  file:
+    path: "/etc/php/7.2/mods-available/opcache.ini"
+    state: absent
+
+- name: Create opcache.ini
+  template: 
+    src: opcache.j2
+    dest: "/etc/php/7.2/mods-available/opcache.ini"
+
+- name: php-fpm.conf update
+  lineinfile:
+    dest: /etc/php/7.2/fpm/php-fpm.conf
+    regexp: "{{item.regexp}}"
+    line: "{{item.line}}"
+    state: present
+  with_items:
+    - regexp: "^;?emergency_restart_threshold"
+      line: "emergency_restart_threshold = 10"
+    - regexp: "^;?emergency_restart_interval"
+      line: "emergency_restart_interval = 15"
+    - regexp: "^;?process_control_timeout"
+      line: "process_control_timeout = 5"
+    - regexp: "^; ?process.max"
+      line: "process.max = {{ (ansible_processor_vcpus * 3) | int }}"
+    - regexp: "^;?rlimit_core"
+      line: "rlimit_core = unlimited"
+    - regexp: "^;?systemd_interval "
+      line: "systemd_interval  = 30"
+
+- name: Restart php7.2-fpm
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: php7.2-fpm

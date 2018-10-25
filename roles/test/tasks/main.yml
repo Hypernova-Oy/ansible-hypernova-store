@@ -1,0 +1,28 @@
+﻿---
+# - name: Collect only facts returned by facter
+#   setup:
+#     gather_subset:
+#       - '!all'
+#       - '!any'
+#       - facter
+# - debug:
+#     var: hostvars[inventory_hostname]
+
+
+- name: get the username running the deploy
+  become: no
+  template: 
+    src: test.j2 
+    dest: "~/ansible_users_keys/ip-login.log"
+  delegate_to: 127.0.0.1
+  #run_once: True
+
+
+# - name: get the username running the deploy
+#   set_fact:
+#     #ip_addr: "{{ lookup('dig', '{{ item }}' ) }}"
+#     ip_addr: "{{ item }}"
+#   with_items: "{{ inventory_hostname }}"
+# - debug:
+#     var: ip_addr
+

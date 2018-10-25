@@ -13,8 +13,8 @@ gather_facts=no
 localhost ansible_host=127.0.0.1
 
 [web]
-ansible-test.u16 ansible_host=192.168.182.128
-#ansible-test.u18 ansible_host=192.168.182.129
+#ansible-test.u16 ansible_host=192.168.182.128
+ansible-test.u18 ansible_host=192.168.182.129
 
 [web:vars]
 ansible_user=ansiblec4vhk

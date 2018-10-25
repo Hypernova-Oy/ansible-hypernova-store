@@ -1,0 +1,48 @@
+{{ ansible_managed | comment(decoration="; ") }}
+
+[production]
+user = www-data
+group = www-data
+listen = 127.0.0.1:9072
+
+listen.backlog = 65535
+
+listen.owner = www-data
+listen.group = www-data
+listen.mode = 0660
+
+listen.allowed_clients = 127.0.0.1
+
+pm = static
+pm.max_children = {{ (ansible_processor_vcpus * 2) | int }}
+pm.max_requests = 1000
+pm.process_idle_timeout = 10s;
+pm.status_path = /fpm-status
+
+ping.path = /fpm-ping
+ping.response = pong
+request_terminate_timeout = 180
+rlimit_files = 131072 
+rlimit_core = unlimited
+catch_workers_output = yes
+security.limit_extensions = .php .php3 .php4 .php5
+
+;slowlog = /var/log/fpm-php-$pool-slow.log
+;request_slowlog_timeout = 5
+;access.log = /var/log/php-fpm-$pool-access.log
+
+;php_admin_value[sendmail_path] = /usr/sbin/sendmail -t -i -f www@my.domain.com
+php_flag[display_errors] = off
+php_admin_value[error_log] = /var/log/php7.2-fpm.log
+php_admin_flag[log_errors] = off
+php_admin_value[memory_limit] = 1024M
+php_admin_value[upload_max_filesize] = 100M
+php_admin_value[post_max_size] = 100M
+php_admin_value[max_execution_time] = 180
+php_admin_value[max_input_time] = 360
+php_admin_value[default_socket_timeout] = 180
+php_admin_value[realpath_cache_size] = 64k
+php_admin_value[realpath_cache_ttl] = 7200
+php_admin_value[cgi.fix_pathinfo] = 1
+php_admin_value[output_buffering] = 8192
+php_admin_value[max_input_vars] = 10000

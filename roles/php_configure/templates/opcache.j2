@@ -1,0 +1,25 @@
+{{ ansible_managed | comment(decoration="; ") }}
+; configuration for php opcache module
+; priority=10
+zend_extension=opcache.so
+opcache.enable=1
+opcache.memory_consumption={{ (ansible_memtotal_mb * 0.025) | int }}
+opcache.revalidate_freq=600
+
+; comment this out in your dev environment
+opcache.validate_timestamps=1
+
+; find . -type f -print | grep php | wc -l
+opcache.max_accelerated_files=18000
+
+opcache.interned_strings_buffer=16
+;opcache.fast_shutdown=1
+opcache.max_wasted_percentage=10
+
+opcache.revalidate_path=1
+opcache.use_cwd=1
+
+opcache.consistency_checks=0
+;opcache.enable_cli=1
+;opcache.save_comments=1
+opcache.enable_file_override=1
