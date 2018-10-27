@@ -1,0 +1,90 @@
+---
+- name: "Add APT open source NGINX Signing Key"
+  apt_key:
+    id: 573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62
+    keyserver: "hkp://p80.pool.sks-keyservers.net:80"
+    state: present
+
+- name: "(Install: Debian/Ubuntu) Add NGINX Unit Repository"
+  apt_repository:
+    repo: "{{ item }}"
+  with_items:
+    - deb https://packages.nginx.org/unit/{{ ansible_distribution|lower }}/ {{ ansible_distribution_release }} unit
+    - deb-src https://packages.nginx.org/unit/{{ ansible_distribution|lower }}/ {{ ansible_distribution_release }} unit
+
+- name: Install Nginx modules GeoIP Module, RTMP Module, XSLT Module
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+      - nginx-full
+      - libnginx-mod-http-auth-pam
+      - libnginx-mod-http-cache-purge
+      - libnginx-mod-http-dav-ext
+      - libnginx-mod-http-echo
+      - libnginx-mod-http-fancyindex
+      - libnginx-mod-http-headers-more-filter
+      - libnginx-mod-http-lua
+      - libnginx-mod-http-ndk
+      - libnginx-mod-http-perl
+      - libnginx-mod-http-subs-filter
+      - libnginx-mod-http-uploadprogress
+      - libnginx-mod-http-upstream-fair
+      - libnginx-mod-nchan
+      - libnginx-mod-rtmp
+      - libnginx-mod-http-geoip
+      - libnginx-mod-http-image-filter
+      - libnginx-mod-http-xslt-filter
+      - libnginx-mod-mail
+      - libnginx-mod-stream
+      - nginx-common
+      - libhiredis0.13
+      - libluajit-5.1-2
+      - libluajit-5.1-common
+
+- name: Copy Nginx config files to the remote server
+  copy:
+    src: roles/nginx/templates/conf/
+    dest: /etc/nginx
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+
+- name: Create Keys Directory
+  file:
+    state: directory
+    path: "{{ self_signed_ssl_dir }}"
+
+- name: Generate DH Params (may take several minutes!)  
+  openssl_dhparam:
+    path: "{{self_signed_ssl_dhparam}}"
+    size: 2048
+
+# - name: Generate DH Params (may take several minutes!)
+#   command: openssl dhparam -out {{self_signed_ssl_dhparam}} {{self_signed_ssl_dh_size}}
+
+- name: Remove default nginx virtual host
+  file: 
+    path: "/etc/nginx/sites-enabled/default"
+    state: absent
+
+- name: Enable no-defauld protection
+  file:
+    src: "/etc/nginx/sites-available/no-default.conf"
+    dest: "/etc/nginx/sites-enabled/no-default.conf"
+    state: link
+
+- name: Enable stats
+  file:
+    src: "/etc/nginx/sites-available/stats.conf"
+    dest: "/etc/nginx/sites-enabled/stats.conf"
+    state: link
+
+- name: Create cache directory
+  file:
+    state: directory
+    path: "/var/cache/nginx/client_temp"

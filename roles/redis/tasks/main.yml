@@ -1,5 +1,5 @@
 ﻿---
-- include_tasks: common/tasks/get_memory.yml
+- include_tasks: get_memory.yml
 
 - name: Install Redis server
   apt:
@@ -31,25 +31,6 @@
 - name: Remove dependencies that are no longer required
   apt:
     autoremove: yes
-
-# - name: sysctl.conf update for Redis requirements
-#   lineinfile:
-#     dest: /etc/sysctl.conf
-#     line: "{{ item.line }}"
-#     insertafter: "{{ item.insertafter }}"
-#   with_items:
-#     - line: "net.core.somaxconn = 1024"
-#       insertafter: EOF
-#     - line: "vm.overcommit_memory = 1"
-#       insertafter: EOF
-
-# - name: sysctl.conf update for Redis requirements
-#   sysctl:
-#     name: net.core.somaxconn
-#     value: 1024
-#     sysctl_set: yes
-#     state: present
-#     reload: yes
 
 - name: sysctl.conf update for Redis requirements
   sysctl:

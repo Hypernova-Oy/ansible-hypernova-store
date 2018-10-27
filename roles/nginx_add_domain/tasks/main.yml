@@ -1,0 +1,10 @@
+---
+# ansible-playbook -i hosts server.yml --flush-cache --extra-vars="new_domain_name=testdomain.com" --tags wordpress or magento2
+
+- name: Create Nginx for a Wordpress site
+  import_tasks: wordpress.yml
+  tags: wordpress
+
+# - name: Create Nginx for a Wordpress site
+#   import_tasks: magento2.yml
+#   tags: magento2

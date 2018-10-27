@@ -1,0 +1,64 @@
+{{ ansible_managed | comment(decoration="# ") }}
+
+include		magento2-bp/map-admin-timeouts.conf;
+
+server {
+	listen        80;
+	listen        [::]:80;
+	server_name   {{ domain_name }} www.{{ domain_name }};
+	return        301 https://www.{{ domain_name }}$request_uri;
+	}
+
+server {
+	listen      443 ssl http2;
+	listen      [::]:443 ssl http2;
+	server_name {{ domain_name }};
+  include     magento-bp/ssl.conf;
+	return			301 https://www.{{ domain_name }}$request_uri;
+	}
+
+server {
+	listen		  443 ssl http2;
+	listen		  [::]:443 ssl http2;
+	server_name	www.{{ domain_name }};
+	set		      $MAGE_ROOT /var/www/{{ domain_name }}/httpdocs/;
+	set		      $MAGE_MODE production; # or production or developer
+	root		    $MAGE_ROOT/pub;
+
+	access_log	/var/log/nginx/{{ domain_name }}-access.log combined buffer=32k;
+	error_log   /var/log/nginx/{{ domain_name }}-error.log error;
+
+	index		    index.html index.htm index.php;
+	include		  nginx-bp/letsencrypt-acme-challenge.conf;
+	include		  magento-bp/ssl.conf;
+	include		  nginx-bp/phpmyadmin.conf;
+	include		  magento-bp/setup_update.conf; # should avoid Varnish Cache-Control
+	include		  nginx-bp/favicon.conf;
+	include		  magento-bp/location-rewrites.conf;
+	include		  magento2-bp/extra_protect.conf;
+	charset		  off;
+
+	if ($bad_client) { return 444; }
+
+	location /sitemap.xml { 
+		alias $MAGE_ROOT/pub/sitemaps/sitemap_$magecode.xml;
+	}
+
+	location /
+	{
+		if ($uatype = 'limitbots') { limit_rate 8k;}
+		try_files $uri $uri/ /index.php?$args;
+		# set $auth_basic Restricted;
+		# if (!-f $MAGE_ROOT/.htpasswd) {
+		#         set $auth_basic off;
+		# }
+		# auth_basic $auth_basic;
+		# auth_basic_user_file $MAGE_ROOT/.htpasswd;
+	}
+
+	include		  magento2-bp/location_pub.conf;
+	include		  magento2-bp/location_media_and_static.conf;
+	
+  # Pass to PHP-FPM
+	include		  magento2-bp/php_production.conf;
+}

@@ -58,6 +58,7 @@
       - bc
       - dstat
       - ioping
+      # - python-pip
 
 - name: Install PHP 7.2
   apt:
@@ -103,7 +104,6 @@
         - libtidy5
         - libzip4
         - php-cli
-        - php-common
         - php-mbstring
         - php-xml
         - fontconfig-config
@@ -137,6 +137,7 @@
         - php-symfony-finder
         - php-symfony-polyfill-mbstring
         - php-symfony-process
+        - dirmngr
 
 - name: Remove useless packages from the cache
   apt:

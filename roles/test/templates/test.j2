@@ -1,8 +1,0 @@
-ip:
-{% for h in groups['web'] %}
- - {{ hostvars[h].ansible_host }}
-{% endfor %}
-
-{% for h in groups['web'] %}
- - {{ hostvars[h].ansible_nodename }}
-{% endfor %}

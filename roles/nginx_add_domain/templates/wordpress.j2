@@ -1,0 +1,77 @@
+{{ ansible_managed | comment(decoration="# ") }}
+
+server {
+	listen		80;
+	listen		[::]:80;
+	server_name	{{ new_domain_name }} www.{{ new_domain_name }};
+	return		301 https://www.{{ new_domain_name }}$request_uri;
+	}
+
+server {
+	listen		443 ssl http2;
+	listen		[::]:443 ssl http2;
+	server_name	{{ new_domain_name }};
+	include		wp-bp/{{new_domain_name}}_ssl.conf;
+	return		301 https://www.{{ new_domain_name }}$request_uri;
+	}
+
+server {
+	listen		443 ssl http2;
+	listen		[::]:443 ssl http2;
+	server_name	www.{{ new_domain_name }};
+ 	set		$WP_ROOT /var/www/{{ new_domain_name }}/httpdocs;
+	root		$WP_ROOT;
+
+	access_log	/var/log/nginx/{{ new_domain_name }}-access.log combined buffer=32k;
+	error_log	/var/log/nginx/{{ new_domain_name }}-error.log error;
+
+	index		index.php index.html index.htm;
+	include		nginx-bp/letsencrypt-acme-challenge.conf;
+	include		nginx-bp/methods.conf;
+	include		nginx-bp/favicon.conf;
+	include		nginx-bp/static.conf;
+	include		wp-bp/wordpress.conf;
+	include		nginx-bp/phpmyadmin.conf;
+	include		nginx-bp/forbidrules.conf;
+	include		wp-bp/{{new_domain_name}}_ssl.conf;
+	include		nginx-bp/htpasswd.conf;
+
+	if ($bad_client) { return 403; }
+
+	location /
+	{
+		try_files	$uri $uri/ /index.php?$args;
+		if ($uatype = 'limitbots') { limit_rate 8k;}
+	}
+
+	location ~ [^/]\.php(/|$)
+	{
+	    if ($uatype = 'limitbots') { limit_rate 8k;}
+	    fastcgi_split_path_info	^(.+?\.php)(/.*)$;
+	    fastcgi_pass		fastcgi_backend_prod;
+	    fastcgi_index		index.php;
+	    fastcgi_param		SCRIPT_FILENAME	$document_root$fastcgi_script_name;
+	    fastcgi_param		PATH_INFO	$fastcgi_path_info;
+	    include			fastcgi_params;
+	    fastcgi_hide_header		"X-Powered-By";
+	    limit_req			zone=reqPerSec50  burst=100 nodelay;
+	    limit_conn			conPerIp 50;
+	    real_ip_header		X-Forwarded-For;
+	    real_ip_recursive		on;
+	    add_header			X-Time-Spent $request_time always;
+	    #add_header			X-Frame-Options SAMEORIGIN always;
+	    add_header			X-Frame-Options DENY;
+	    add_header			X-Content-Type-Options nosniff always;
+	    add_header			X-XSS-Protection "1; mode=block" always;
+	    add_header			X-Support console.support always;
+	    add_header			Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+	    # (!) If you are using `ngx_pagespeed`, please note that setting
+	    # the `Cache-Control: no-transform` response header will prevent
+	    # `PageSpeed` from rewriting `HTML` files, and, if
+	    # `pagespeed DisableRewriteOnNoTransform off` is not used, also
+	    # from rewriting other resources.
+	    # https://developers.google.com/speed/pagespeed/module/configuration#notransform
+	    add_header                "Cache-Control" "no-transform";
+	}
+}

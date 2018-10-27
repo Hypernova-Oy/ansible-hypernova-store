@@ -1,0 +1,23 @@
+---
+- name: "Add APT open source NGINX Signing Key"
+  apt_key:
+    id: 573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62
+    keyserver: "hkp://p80.pool.sks-keyservers.net:80"
+    state: present
+
+- name: "(Install: Debian/Ubuntu) Add NGINX Unit Repository"
+  apt_repository:
+    repo: "{{ item }}"
+  with_items:
+    - deb https://packages.nginx.org/unit/{{ ansible_distribution|lower }}/ {{ ansible_distribution_release }} unit
+    - deb-src https://packages.nginx.org/unit/{{ ansible_distribution|lower }}/ {{ ansible_distribution_release }} unit
+
+- name: Install Nginx modules GeoIP Module, RTMP Module, XSLT Module
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+      - phpmyadmin

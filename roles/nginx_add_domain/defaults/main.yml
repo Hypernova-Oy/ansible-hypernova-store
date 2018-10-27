@@ -1,0 +1,31 @@
+---
+#self_signed_ssl_domain: "console.suport"
+self_signed_ssl_domain: "new_domain_name"
+self_signed_ssl_country: "UA"
+self_signed_ssl_state: "UA"
+self_signed_ssl_city: "Kyiv"
+self_signed_ssl_org: "console.suport"
+self_signed_ssl_email: "info@console.suport"
+
+#self_signed_ssl_dir: /etc/nginx/ssl/{{ self_signed_ssl_domain }}
+self_signed_ssl_dir: /etc/nginx/ssl
+self_signed_ssl_dh_size: 2048
+self_signed_ssl_key_size: 2048
+self_signed_ssl_ecc: no
+
+# You probably will not need to change these
+self_signed_ssl_key_file: "{{self_signed_ssl_domain}}.key"
+self_signed_ssl_csr_file: "{{self_signed_ssl_domain}}.csr"
+self_signed_ssl_cert_file: "{{self_signed_ssl_domain}}.crt"
+self_signed_ssl_dhparam_file: dhparam.pem
+
+# Public key lifetime in days; defaults to 5 years
+self_signed_ssl_cert_lifetime: 3650
+
+# Private
+self_signed_ssl_key: "{{ self_signed_ssl_dir }}/{{ self_signed_ssl_key_file }}"
+self_signed_ssl_csr: "{{ self_signed_ssl_dir }}/{{ self_signed_ssl_csr_file }}"
+self_signed_ssl_cert: "{{ self_signed_ssl_dir }}/{{ self_signed_ssl_cert_file }}"
+self_signed_ssl_dhparam: "{{ self_signed_ssl_dir }}/{{ self_signed_ssl_dhparam_file }}"
+
+self_signed_ssl_subject: "/C={{ self_signed_ssl_country }}/ST={{ self_signed_ssl_state }}/L={{ self_signed_ssl_city }}/O={{ self_signed_ssl_org }}/CN={{ self_signed_ssl_domain }}"

@@ -1,0 +1,32 @@
+---
+- name: Generate self-signed Nginx key
+  command: openssl req -new \
+    -newkey rsa:{{self_signed_ssl_key_size}} \
+    -days {{self_signed_ssl_cert_lifetime}} \
+    -nodes -x509 -keyout {{self_signed_ssl_key}} \
+    -out {{self_signed_ssl_cert}} \
+    -subj {{self_signed_ssl_subject}}
+
+- name: Create domain config
+  template: 
+    src: wordpress.j2
+    dest: "/etc/nginx/sites-available/{{new_domain_name}}.conf"
+
+- name: Add self-signed SSL
+  template: 
+    src: ssl.j2
+    dest: "/etc/nginx/wp-bp/{{new_domain_name}}_ssl.conf"
+
+- name: Enable this domain/ Create symlink into sites-available directory.
+  file:
+    src: "/etc/nginx/sites-available/{{new_domain_name}}.conf"
+    dest: "/etc/nginx/sites-enabled/{{new_domain_name}}.conf"
+    state: link
+
+- name: Create directory for site
+  file:
+    state: directory
+    path: "/var/www/{{new_domain_name}}/httpdocs"
+    owner: www-data
+    group: www-data
+    mode: 02775
