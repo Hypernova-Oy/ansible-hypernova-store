@@ -1,0 +1,22 @@
+---
+- name: Gathering memory from the new server
+  setup:
+    filter: ansible_memtotal_mb
+    gather_subset:
+      - hardware
+
+- name: Gathering facts on number CPUs from the new server
+  setup:
+    filter: ansible_processor_vcpus
+    gather_subset:
+      - hardware
+
+# - name: 'Set MariaDB facts'
+#   set_fact:
+#     mariadb_admin_home: "/root"
+#     mariadb_admin_user: "root{{user_six.stdout}}"
+#     mariadb_admin_password: "{{ user_mysql_pass.stdout }}"
+#     pma_user_pass: "{{ user_pma_mysql_pass.stdout }}"
+#     htpasswd_user: "pma{{ user_six_htpasswd.stdout }}"
+#     htpasswd_passw: "{{user_pma_htpasswd.stdout}}"
+

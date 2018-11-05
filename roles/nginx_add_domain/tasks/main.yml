@@ -5,6 +5,6 @@
   import_tasks: wordpress.yml
   tags: wordpress
 
-# - name: Create Nginx for a Wordpress site
-#   import_tasks: magento2.yml
-#   tags: magento2
+- name: Create Nginx for a Wordpress site
+  import_tasks: magento2.yml
+  tags: magento2

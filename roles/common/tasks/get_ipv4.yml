@@ -2,3 +2,6 @@
 - name: Gathering facts of IPv4 from the new server
   setup:
     filter: ansible_default_ipv4.address
+    gather_subset:
+      - network
+

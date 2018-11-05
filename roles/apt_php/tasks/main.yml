@@ -58,7 +58,10 @@
       - bc
       - dstat
       - ioping
-      # - python-pip
+      - apache2-utils
+      - libapr1
+      - libaprutil1
+      - python-passlib
 
 - name: Install PHP 7.2
   apt:

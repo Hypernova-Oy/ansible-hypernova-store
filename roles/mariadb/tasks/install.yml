@@ -1,0 +1,37 @@
+---
+- name: Install MariaDB server
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+      - galera-3
+      - gdb
+      - gdbserver
+      - libaio1
+      - libbabeltrace1
+      - libc6-dbg
+      - libcc1-0
+      - libconfig-inifiles-perl
+      - libdbd-mysql-perl
+      - libdbi-perl
+      - libdw1
+      - libhtml-template-perl
+      - libmysqlclient20
+      - libterm-readkey-perl
+      - libtext-template-perl
+      - mariadb-client-10.1
+      - mariadb-client-core-10.1
+      - mariadb-common
+      - mariadb-server
+      - mariadb-server-10.1
+      - mariadb-server-core-10.1
+      - mysql-common
+      - mysqltuner
+      - percona-toolkit
+      - socat
+      - python-mysqldb
+
+      

@@ -9,18 +9,18 @@
 
 - name: Create domain config
   template: 
-    src: wordpress.j2
-    dest: "/etc/nginx/sites-available/{{new_domain_name}}.conf"
+    src: magento2.j2
+    dest: "/etc/nginx/sites-available/{{new_domain_name}}-mg2.conf"
 
 - name: Add self-signed SSL
   template: 
     src: ssl.j2
-    dest: "/etc/nginx/wp-bp/{{new_domain_name}}_ssl.conf"
+    dest: "/etc/nginx/magento-bp/{{new_domain_name}}_ssl.conf"
 
 - name: Enable this domain/ Create symlink into sites-available directory.
   file:
-    src: "/etc/nginx/sites-available/{{new_domain_name}}.conf"
-    dest: "/etc/nginx/sites-enabled/{{new_domain_name}}.conf"
+    src: "/etc/nginx/sites-available/{{new_domain_name}}-mg2.conf"
+    dest: "/etc/nginx/sites-enabled/{{new_domain_name}}-mg2.conf"
     state: link
 
 - name: Create directory for site

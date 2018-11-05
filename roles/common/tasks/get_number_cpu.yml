@@ -2,3 +2,5 @@
 - name: Gathering facts on number CPUs from the new server
   setup:
     filter: ansible_processor_vcpus
+    gather_subset:
+      - hardware

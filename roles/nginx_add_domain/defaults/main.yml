@@ -1,6 +1,6 @@
 ---
 #self_signed_ssl_domain: "console.suport"
-self_signed_ssl_domain: "new_domain_name"
+self_signed_ssl_domain: "{{new_domain_name}}"
 self_signed_ssl_country: "UA"
 self_signed_ssl_state: "UA"
 self_signed_ssl_city: "Kyiv"

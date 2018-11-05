@@ -1,0 +1,214 @@
+---
+- name: Get the username running the deploy
+  local_action: command whoami
+  become: no
+  register: username_on_the_host
+  delegate_to: 127.0.0.1
+  run_once: True
+
+- name: Create directory if they don't exist
+  become: no
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0775
+  with_items:
+    - ~/ansible_users_keys
+  delegate_to: 127.0.0.1
+  run_once: True
+
+- name: Generate few random char to secure new user name
+  become: no
+  shell: "makepasswd --chars=6"
+  register: "user_six"
+  delegate_to: 127.0.0.1
+  run_once: True
+  no_log: True
+
+- name: Generate password for root user
+  become: no
+  shell: makepasswd --chars=15
+  register: "user_mysql_pass"
+  delegate_to: 127.0.0.1
+  run_once: True
+  no_log: true
+
+- name: Generate password for PMA user
+  become: no
+  shell: makepasswd --chars=15
+  register: "user_pma_mysql_pass"
+  delegate_to: 127.0.0.1
+  run_once: True
+  no_log: true
+
+- name: Generate .htpasswd PMA user
+  become: no
+  shell: makepasswd --chars=15
+  register: "user_pma_htpasswd"
+  delegate_to: 127.0.0.1
+  run_once: True
+  no_log: true
+
+- name: Generate few random char to secure new user name for .htpasswd
+  become: no
+  shell: "makepasswd --chars=6"
+  register: "user_six_htpasswd"
+  delegate_to: 127.0.0.1
+  run_once: True
+  no_log: True
+
+- name: 'Set MariaDB facts'
+  set_fact:
+    mariadb_admin_home: "/root"
+    mariadb_admin_user: "root{{user_six.stdout}}"
+    mariadb_admin_password: "{{ user_mysql_pass.stdout }}"
+    pma_user_pass: "{{ user_pma_mysql_pass.stdout }}"
+    htpasswd_user: "pma{{ user_six_htpasswd.stdout }}"
+    htpasswd_passw: "{{user_pma_htpasswd.stdout}}"
+
+# - name: 'Set MariaDB facts'
+#   set_fact:
+#     _mariadb_login_user: "{{ mariadb_admin_user }}"
+#     _mariadb_login_password: "{{ mariadb_admin_password }}"
+#     _mariadb_cmd_login: '-u root'
+
+- name: Setting fact for RAM size less 1 GB Maximum possible memory usage by MySQL 500M
+  set_fact:
+    key_buffer_size: "1M"
+    max_allowed_packet: "2M"
+    thread_stack: "16K"
+    thread_cache_size: "2"
+    sort_buffer_size: "4M"
+    tmp_table_size: "16M"
+    max_heap_table_size: "16M"
+    join_buffer_size: "128K"
+    max_connections: "25"
+    table_cache: "128"
+    query_cache_limit: "1M"
+    query_cache_size: "4M"
+    innodb_log_file_size: "32M"
+    innodb_buffer_pool_size: "128M"
+    innodb_buffer_pool_instances: "1"
+    innodb_log_buffer_size: "1M"
+  when: (ansible_facts['memtotal_mb']|int >= 900 and ansible_facts['memtotal_mb']|int <= 1500)
+
+
+- name: Setting fact for RAM size less 2 GB Maximum possible memory usage by MySQL 1G
+  set_fact:
+    key_buffer_size: "2M"
+    max_allowed_packet: "4M"
+    thread_stack: "192K"
+    thread_cache_size: "8"
+    sort_buffer_size: "2M"
+    tmp_table_size: "32M"
+    max_heap_table_size: "32M"
+    join_buffer_size: "512K"
+    max_connections: "50"
+    table_cache: "1024"
+    query_cache_limit: "8M"
+    query_cache_size: "16M"
+    innodb_log_file_size: "128M"
+    innodb_buffer_pool_size: "512M"
+    innodb_buffer_pool_instances: "1"
+    innodb_log_buffer_size: "32M"
+  when: (ansible_facts['memtotal_mb']|int >= 1501 and ansible_facts['memtotal_mb']|int <= 3800)
+
+- name: Setting fact for RAM size less 4 GB Maximum possible memory usage by MySQL 2G
+  set_fact:
+    key_buffer_size: "8M"
+    max_allowed_packet: "8M"
+    thread_stack: "192K"
+    thread_cache_size: "8"
+    sort_buffer_size: "8M"
+    tmp_table_size: "96M"
+    max_heap_table_size: "96M"
+    join_buffer_size: "1M"
+    max_connections: "50"
+    table_cache: "1024"
+    query_cache_limit: "16M"
+    query_cache_size: "32M"
+    innodb_log_file_size: "256M"
+    innodb_buffer_pool_size: "1G"
+    innodb_buffer_pool_instances: "1"
+    innodb_log_buffer_size: "64M"
+  when: (ansible_facts['memtotal_mb']|int >= 3801 and ansible_facts['memtotal_mb']|int <= 7999)
+
+- name: Setting fact for RAM size less 8 GB Maximum possible memory usage by MySQL 4G
+  set_fact:
+    key_buffer_size: "16M"
+    max_allowed_packet: "16M"
+    thread_stack: "256K"
+    thread_cache_size: "8"
+    sort_buffer_size: "32M"
+    tmp_table_size: "128M"
+    max_heap_table_size: "128M"
+    join_buffer_size: "2M"
+    max_connections: "75"
+    table_cache: "1024"
+    query_cache_limit: "32M"
+    query_cache_size: "64M"
+    innodb_log_file_size: "256M"
+    innodb_buffer_pool_size: "1G"
+    innodb_buffer_pool_instances: "64M"
+    innodb_log_buffer_size: "64M"
+  when: (ansible_facts['memtotal_mb']|int >= 8000 and ansible_facts['memtotal_mb']|int <= 14999)
+
+- name: Setting fact for RAM size less 16 GB Maximum possible memory usage by MySQL 8G
+  set_fact:
+    key_buffer_size: "16M"
+    max_allowed_packet: "16M"
+    thread_stack: "256K"
+    thread_cache_size: "8"
+    sort_buffer_size: "32M"
+    tmp_table_size: "128M"
+    max_heap_table_size: "128M"
+    join_buffer_size: "5M"
+    max_connections: "150"
+    table_cache: "1024"
+    query_cache_limit: "32M"
+    query_cache_size: "64M"
+    innodb_log_file_size: "512M"
+    innodb_buffer_pool_size: "2G"
+    innodb_buffer_pool_instances: "2"
+    innodb_log_buffer_size: "128M"
+  when: (ansible_facts['memtotal_mb']|int >= 15000 and ansible_facts['memtotal_mb']|int <= 29999)
+
+- name: Setting fact for RAM size less 32 GB Maximum possible memory usage by MySQL 18G
+  set_fact:
+    key_buffer_size: "32M"
+    max_allowed_packet: "32M"
+    thread_stack: "512K"
+    thread_cache_size: "8"
+    sort_buffer_size: "64M"
+    tmp_table_size: "128M"
+    max_heap_table_size: "128M"
+    join_buffer_size: "6M"
+    max_connections: "200"
+    table_cache: "2048"
+    query_cache_limit: "32M"
+    query_cache_size: "64M"
+    innodb_log_file_size: "1G"
+    innodb_buffer_pool_size: "4G"
+    innodb_buffer_pool_instances: "4"
+    innodb_log_buffer_size: "128M"
+  when: (ansible_facts['memtotal_mb']|int >= 30000 and ansible_facts['memtotal_mb']|int <= 60000)
+
+- name: Setting fact for RAM size less 64 GB Maximum possible memory usage by MySQL 32G
+  set_fact:
+    key_buffer_size: "32M"
+    max_allowed_packet: "32M"
+    thread_stack: "1M"
+    thread_cache_size: "8"
+    sort_buffer_size: "64M"
+    tmp_table_size: "128M"
+    max_heap_table_size: "128M"
+    join_buffer_size: "8M"
+    max_connections: "200"
+    table_cache: "4096"
+    query_cache_limit: "32M"
+    query_cache_size: "64M"
+    innodb_log_file_size: "1G"
+    innodb_buffer_pool_size: "16G"
+    innodb_buffer_pool_instances: "16"
+    innodb_log_buffer_size: "512M"
+  when: (ansible_facts['memtotal_mb']|int >= 60001 and ansible_facts['memtotal_mb']|int <= 128000)

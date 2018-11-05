@@ -1,0 +1,19 @@
+---
+- name: Delete file 50-server.cnf
+  file:
+    path: "/etc/mysql/mariadb.conf.d/50-server.cnf"
+    state: absent
+
+- name: Create 50-server.cnf depends on RAM of the server
+  template: 
+    src: 50-server.cnf.j2
+    dest: "/etc/mysql/mariadb.conf.d/50-server.cnf"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: enable service MySQL and ensure it is not masked
+  systemd:
+    name: mysql
+    enabled: yes
+    masked: no

@@ -1,0 +1,20 @@
+{{ ansible_managed | comment(decoration="# ") }}
+
+The new MySQL admin user with all permissions has been successfully created
+======================================
+Login: {{ mariadb_admin_user }}
+Password: {{ mariadb_admin_password }}
+Hosts: {{ mariadb_admin_hosts }}
+
+PHPMyAdmin
+======================================
+DB user password: {{pma_user_pass}}
+Http access:
+  user: {{htpasswd_user}}
+  pass: {{htpasswd_passw}}
+
+Date: {{ ansible_date_time.date }}
+
+=========================================
+
+mysql --host localhost --user={{ mariadb_admin_user }} --password={{ mariadb_admin_password }}

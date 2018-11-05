@@ -1,0 +1,99 @@
+---
+- name: Add administrative user
+  mysql_user:
+    user: "{{ mariadb_admin_user }}"
+    password: "{{ mariadb_admin_password | default(omit) }}"
+    host: "{{ item }}"
+    priv: '*.*:ALL,GRANT'
+    state: present
+    check_implicit_admin: true
+    login_user: "root"
+    login_password: ""
+  no_log: mariadb_debug == false
+  changed_when: false # required for idempotence
+  with_items: "{{ mariadb_admin_hosts }}"
+  
+- name: Remove test database
+  mysql_db:
+    name: test
+    state: absent
+    login_user: "root"
+    login_password: ""
+  no_log: mariadb_debug == false
+
+- name: Fetch all hosts
+  command: mysql -u root -NBe "SELECT Host FROM mysql.user ORDER BY (Host='localhost') ASC"
+  register: mysql_hosts
+  changed_when: false
+
+- name: Delete all users not in allowed hosts
+  shell: mysql -u root -NBe 'DELETE FROM mysql.user WHERE host = "{{ item }}"'
+  when: item not in mariadb_allowed_hosts
+  with_items: "{{ mysql_hosts.stdout_lines }}"
+
+# Removes all anonymous user accounts
+- name: Remove anonymous user
+  mysql_user:
+    name: ''
+    host_all: yes
+    state: absent
+
+- name: "Delete file {{mariadb_admin_home}}/.my.cnf"
+  file:
+    path: "{{mariadb_admin_home}}/.my.cnf"
+    state: absent
+
+- name: Create .my.cnf
+  template: 
+    src: user_my.cnf.j2
+    dest: "{{mariadb_admin_home}}/.my.cnf"
+    owner: root
+    group: root
+    mode: 0640
+
+- name: "Delete file /etc/mysql/debian.cnf"
+  file:
+    path: "/etc/mysql/debian.cnf"
+    state: absent
+
+- name: "Create /etc/mysql/debian.cnf"
+  template: 
+    src: debian.cnf.j2
+    dest: "/etc/mysql/debian.cnf"
+    owner: root
+    group: root
+    mode: 0640
+
+- name: Remove root user completely
+  mysql_user:
+    user: 'root'
+    host: "{{ item }}"
+    state: absent
+    login_user: "{{ mariadb_admin_user }}"
+    login_password: "{{ mariadb_admin_password }}"
+  no_log: mariadb_debug == false
+  when: mariadb_admin_user != 'root'
+  with_items: "{{ mysql_hosts.stdout_lines }}"
+
+- name: Restart mariadb on config changes right away
+  service:
+    name: mysql
+    state: restarted
+
+- name: Wait for mariadb to be started
+  wait_for:
+    port: '{{ mariadb_port }}'
+    delay: 5
+    timeout: 300
+
+- name: Save login and password to file
+  become: no
+  template: 
+    src: mysql-users-name.j2
+    dest: "~/ansible_users_keys/mysql-{{ mariadb_admin_user }}-PMA-logins.log"
+  delegate_to: 127.0.0.1
+  run_once: True
+  no_log: True
+
+# - debug:
+#     msg: "Login {{ mariadb_admin_user }} password {{ mariadb_admin_password }}"

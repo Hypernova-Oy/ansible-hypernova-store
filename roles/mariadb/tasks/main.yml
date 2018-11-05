@@ -1,0 +1,16 @@
+---
+- include: vars.yml
+  tags: ['always']
+
+- include: install.yml
+  tags: ['mariadb-install']
+
+- include: configure.yml
+  tags: ['mariadb-configure', 'mariadb-update']
+
+- include: secure-installation.yml
+  tags: ['mariadb-secure-installation']
+
+- include: phpmyadmin.yml
+  tags: ['phpmyadmin']
+  

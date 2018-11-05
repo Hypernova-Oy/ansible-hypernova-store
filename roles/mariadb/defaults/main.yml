@@ -1,0 +1,29 @@
+---
+mariadb_default_hosts:
+  - localhost
+  - 127.0.0.1
+  - ::1
+
+mariadb_debug: false
+
+# Hosts
+mariadb_admin_hosts:
+  - 127.0.0.1
+  - ::1
+  - localhost
+
+mariadb_allowed_hosts:
+  - 127.0.0.1
+  - ::1
+  - localhost
+
+mariadb_enabled_on_startup: yes
+
+# # MySQL connection settings.
+mariadb_port: "3306"
+
+# #
+# # You should never have to overwrite these:
+# #
+# mariadb_users: '{{ (mariadb_default_users + mariadb_host_users + mariadb_group_users) | unique }}'
+# mariadb_databases: '{{ (mariadb_default_databases + mariadb_host_databases + mariadb_group_databases) | unique }}'

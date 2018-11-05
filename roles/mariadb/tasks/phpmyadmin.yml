@@ -1,0 +1,55 @@
+---
+- name: debconf for pma
+  debconf:
+    name: phpmyadmin
+    question: 'phpmyadmin/dbconfig-install'
+    value: 'true'
+    vtype: 'boolean'
+
+- name: debconf for pma
+  debconf:
+    name: phpmyadmin
+    question: 'phpmyadmin/mysql/admin-pass'
+    value: '{{mariadb_admin_password}}'
+    vtype: 'password'
+
+- name: debconf for pma app-pass
+  debconf:
+    name: phpmyadmin
+    question: 'phpmyadmin/mysql/app-pass'
+    value: '{{pma_user_pass}}'
+    vtype: 'password'
+
+- name: debconf for pma app-pass confirm
+  debconf:
+    name: phpmyadmin
+    question: 'phpmyadmin/app-password-confirm'
+    value: '{{pma_user_pass}}'
+    vtype: 'password'
+
+- name: debconf for pma
+  debconf:
+    name: phpmyadmin
+    question: 'phpmyadmin/reconfigure-webserver'
+    value: ''
+    vtype: 'multiselect'
+
+- name: Install PHPMyAdmin
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+      - phpmyadmin
+
+- name: Ensure htpasswd credentials are configured.
+  htpasswd:
+    path: "/etc/nginx/.htpasswd"
+    name: "{{ htpasswd_user }}"
+    password: "{{ htpasswd_passw }}"
+    owner: "root"
+    group: "www-data"
+    mode: 0640
+  no_log: true

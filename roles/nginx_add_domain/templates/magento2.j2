@@ -1,41 +1,41 @@
 {{ ansible_managed | comment(decoration="# ") }}
 
-include		magento2-bp/map-admin-timeouts.conf;
+include		magento-bp/map-admin-timeouts.conf;
 
 server {
 	listen        80;
 	listen        [::]:80;
-	server_name   {{ domain_name }} www.{{ domain_name }};
-	return        301 https://www.{{ domain_name }}$request_uri;
+	server_name   {{ new_domain_name }} www.{{ new_domain_name }};
+	return        301 https://www.{{ new_domain_name }}$request_uri;
 	}
 
 server {
 	listen      443 ssl http2;
 	listen      [::]:443 ssl http2;
-	server_name {{ domain_name }};
-  include     magento-bp/ssl.conf;
-	return			301 https://www.{{ domain_name }}$request_uri;
+	server_name {{ new_domain_name }};
+  include     magento-bp/{{ new_domain_name }}_ssl.conf;
+	return			301 https://www.{{ new_domain_name }}$request_uri;
 	}
 
 server {
 	listen		  443 ssl http2;
 	listen		  [::]:443 ssl http2;
-	server_name	www.{{ domain_name }};
-	set		      $MAGE_ROOT /var/www/{{ domain_name }}/httpdocs/;
+	server_name	www.{{ new_domain_name }};
+	set		      $MAGE_ROOT /var/www/{{ new_domain_name }}/httpdocs;
 	set		      $MAGE_MODE production; # or production or developer
 	root		    $MAGE_ROOT/pub;
 
-	access_log	/var/log/nginx/{{ domain_name }}-access.log combined buffer=32k;
-	error_log   /var/log/nginx/{{ domain_name }}-error.log error;
+	access_log	/var/log/nginx/{{ new_domain_name }}-access.log combined buffer=32k;
+	error_log   /var/log/nginx/{{ new_domain_name }}-error.log error;
 
 	index		    index.html index.htm index.php;
 	include		  nginx-bp/letsencrypt-acme-challenge.conf;
-	include		  magento-bp/ssl.conf;
+	include		  magento-bp/{{ new_domain_name }}_ssl.conf;
 	include		  nginx-bp/phpmyadmin.conf;
 	include		  magento-bp/setup_update.conf; # should avoid Varnish Cache-Control
 	include		  nginx-bp/favicon.conf;
 	include		  magento-bp/location-rewrites.conf;
-	include		  magento2-bp/extra_protect.conf;
+	include		  magento-bp/extra_protect.conf;
 	charset		  off;
 
 	if ($bad_client) { return 444; }
@@ -56,9 +56,9 @@ server {
 		# auth_basic_user_file $MAGE_ROOT/.htpasswd;
 	}
 
-	include		  magento2-bp/location_pub.conf;
-	include		  magento2-bp/location_media_and_static.conf;
+	include		  magento-bp/location_pub.conf;
+	include		  magento-bp/location_media_and_static.conf;
 	
   # Pass to PHP-FPM
-	include		  magento2-bp/php_production.conf;
+	include		  magento-bp/php_production.conf;
 }

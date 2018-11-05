@@ -1,5 +1,6 @@
 ﻿---
-- include_tasks: get_memory.yml
+- include: vars.yml
+  tags: ['always']
 
 - name: Install Redis server
   apt:

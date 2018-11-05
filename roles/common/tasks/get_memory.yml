@@ -1,4 +1,6 @@
 ---
-- name: Gathering facts on number CPUs from the new server
+- name: Gathering memory from the new server
   setup:
     filter: ansible_memtotal_mb
+    gather_subset:
+      - hardware

@@ -1,11 +1,23 @@
 ---
 - name: Add the user with password and key
   hosts: web
-  #become: yes
+  become: yes
   roles:
+    # - { role: common, tags: [common] }
+    
     - { role: adduser, tags: [addusers] }
     - { role: sshd, tags: [sshd] }
     - { role: sudo, tags: [sudo] }
-    - { role: apt_php, tags: [php] }
+    - { role: apt_php, tags: [apt] }
     - { role: php_configure, tags: [php_configure] }
     - { role: redis, tags: [redis] }
+    - { role: nginx, tags: [nginx] }
+    - { role: nginx_add_domain, tags: [adddomain] }
+    - { role: mariadb, tags: [mariadbset] }
+    
+    
+
+
+
+    #- { role: test, tags: [testtaskdebug] }
+        
