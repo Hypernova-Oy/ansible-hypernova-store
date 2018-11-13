@@ -3,8 +3,8 @@
 
 - name: Create Nginx for a Wordpress site
   import_tasks: wordpress.yml
-  tags: wordpress
+  tags: ngwordpress
 
 - name: Create Nginx for a Wordpress site
   import_tasks: magento2.yml
-  tags: magento2
+  tags: ngmagento2

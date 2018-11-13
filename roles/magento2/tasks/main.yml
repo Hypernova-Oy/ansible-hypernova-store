@@ -1,0 +1,15 @@
+---
+- include: vars.yml
+  tags: ['always']
+
+- include: create-db.yml
+  tags: ['create-db-mage2']
+
+- include: rabbitmq.yml
+  tags: ['rabbitmq-mage2']
+
+- include: install-mage2.yml
+  tags: ['install-mage2']
+
+- include: n98-mage2.yml
+  tags: ['install-n98-mage2']

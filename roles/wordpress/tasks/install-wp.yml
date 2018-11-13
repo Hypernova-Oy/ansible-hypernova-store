@@ -1,0 +1,61 @@
+---
+- name: Check if WordPress is already installed.
+  command: >
+    wp core is-installed
+    --allow-root
+    chdir: "/var/www/{{ new_domain_name }}/httpdocs"
+  register: wp_site_installed
+  failed_when: false
+  changed_when: false
+
+- name: WP core download
+  command: >
+    wp core download
+    --allow-root --no-color 
+    --path='/var/www/{{ new_domain_name }}/httpdocs'
+    --locale=en_US
+
+- name: Generate WordPress wp-config.php file.
+  command: >
+    wp core config
+    --allow-root --no-color
+    --dbname={{ wp_db_name_and_user }}
+    --dbuser={{ wp_db_name_and_user }}
+    --dbpass={{ wp_db_passwd }}
+    --dbhost="localhost"
+    --dbprefix="wp_"
+    --path='/var/www/{{ new_domain_name }}/httpdocs'
+
+- name: WP install
+  command: >
+    wp core install
+    --allow-root --no-color 
+    --url='https://{{ new_domain_name }}'
+    --title='{{ wp_blog_title }}'
+    --admin_name='{{ wp_admin_user }}'
+    --admin_email='{{ wp_admin_email }}'
+    --admin_password='{{ wp_admin_user_passwd }}'
+    --path='/var/www/{{ new_domain_name }}/httpdocs'
+
+- name: Set user and group owners of files
+  file:
+    path: '/var/www/{{new_domain_name}}/httpdocs'
+    owner: www-data
+    group: www-data
+    mode: 0664
+    recurse: yes
+
+# - name: Set user and group owners
+#   shell: "chown www-data:www-data -R /var/www/{{new_domain_name}}/httpdocs"
+#   register: chown_result
+#   changed_when: "chown_result.stdout != \"\""
+
+- name: Set dir permissions
+  shell: find '/var/www/{{new_domain_name}}/httpdocs' -type d -print0 | xargs -0 chmod -c 2775
+  register: chmod_result
+  changed_when: "chmod_result.stdout != \"\""
+
+# - name: Set all file permissions
+#   shell: find '/var/www/{{new_domain_name}}/httpdocs' -type f -print0 | xargs -0 chmod -c 0664
+#   register: chmod_result
+#   changed_when: "chmod_result.stdout != \"\""

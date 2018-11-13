@@ -1,0 +1,128 @@
+---
+- name: Nginx admin backend timeouts update
+  lineinfile:
+    dest: /etc/nginx/magento-bp/map-admin-timeouts.conf
+    line: '    ~admin{{backend_frontname}} "memory_limit=2048M \n max_execution_time=900 \n max_input_time=900 \n default_socket_timeout=900";'
+    insertafter: "    # Add admin backend"
+
+# - name: Nginx admin multistore update
+#   lineinfile:
+#     dest: /etc/nginx/magento-bp/multishop.conf
+#     line: '    default "{{new_domain_name}}";'
+#     insertafter: "    # Add multishop"
+
+- name: Clone Dev Magento2 repo
+  git:
+    repo: "https://github.com/magento/magento2.git"
+    dest: "{{mage2_home}}"
+    clone: yes
+    update: yes
+    recursive: yes
+    track_submodules: yes
+    
+# - name: Mage2 download
+#   unarchive:
+#     src: 'https://github.com/magento/magento2/archive/{{ mage2release }}.tar.gz'
+#     dest: '/var/www/{{ new_domain_name }}/httpdocs'
+#     extra_opts: "--strip-components=1"
+#     remote_src: yes
+
+- name: Install Magento 2
+  shell: chdir={{mage2_home}} {{item}}
+  with_items:
+    - composer install
+    - >
+      php bin/magento setup:install
+      --use-secure=1
+      --base-url-secure='https://www.{{new_domain_name}}'
+      --use-secure-admin=1
+      --admin-user='{{mage2_admin_user}}'
+      --admin-password='{{mage2_admin_user_passwd}}'
+      --admin-firstname='{{admin_firstname}}'
+      --admin-lastname='{{admin_lastname}}'
+      --admin-email='{{admin_email}}'
+      --backend-frontname=admin'{{backend_frontname}}'
+      --db-host=localhost
+      --db-name='{{mage2_db_name_and_user}}'
+      --db-user='{{mage2_db_name_and_user}}'
+      --db-password='{{mage2_db_passwd}}'
+      --db-prefix='mg2_'
+      --language='{{language}}'
+      --currency='{{currency}}'
+      --timezone='{{timezone}}'
+      --use-rewrites=1
+      --admin-use-security-key=1
+      --cleanup-database 
+      --session-save=redis
+      --session-save-redis-host='127.0.0.1'
+      --session-save-redis-port=6379
+      --session-save-redis-timeout=3
+      --session-save-redis-db=0
+      --session-save-redis-compression-threshold=2048
+      --session-save-redis-compression-lib=gzip
+      --session-save-redis-log-level=3
+      --session-save-redis-max-concurrency=2
+      --session-save-redis-break-after-frontend=5
+      --session-save-redis-break-after-adminhtml=30
+      --session-save-redis-first-lifetime=900
+      --session-save-redis-bot-first-lifetime=60
+      --session-save-redis-bot-lifetime=7200
+      --session-save-redis-min-lifetime=60
+      --session-save-redis-max-lifetime=2592000
+      --page-cache=redis
+      --page-cache-redis-server='127.0.0.1'
+      --page-cache-redis-port=6379
+      --page-cache-redis-db=1
+      --page-cache-redis-compress-data=1
+      --page-cache-redis-compress-data=gzip
+      --cache-backend=redis
+      --cache-backend-redis-server='127.0.0.1'
+      --cache-backend-redis-port=6379
+      --cache-backend-redis-db=2
+      --amqp-host='127.0.0.1'
+      --amqp-port='5672'
+      --amqp-user='{{rabbitmq_user}}'
+      --amqp-password='{{rabbitmq_pass}}'
+      --amqp-virtualhost='/'
+    - php bin/magento deploy:mode:set production
+
+- name: Set user and group owners of files
+  file:
+    path: '/var/www/{{new_domain_name}}/httpdocs'
+    owner: www-data
+    group: www-data
+    mode: 0664
+    recurse: yes
+
+- name: Set dir permissions
+  shell: find '/var/www/{{new_domain_name}}/httpdocs' -type d -print0 | xargs -0 chmod -c 2775
+  register: chmod_result
+  changed_when: "chmod_result.stdout != \"\""
+
+- name: Install cron for Magento 2
+  shell: chdir={{mage2_home}} {{item}}
+  become: yes
+  become_user: www-data
+  with_items:
+    - php bin/magento cron:install
+
+- name: Create new bash file flushall.sh
+  file:
+    path: "/flushall.sh"
+    state: touch
+    owner: root
+    group: root
+    mode: 0744
+
+- name: Add command into flushall.sh to flush redis cache for Magento        
+  blockinfile:
+    path: "/flushall.sh"
+    block: |
+      #!/bin/bash
+      echo 'flushall' | redis-cli -h 127.0.0.1 -p 6379
+      service memcached restart
+      service php7.2-fpm restart
+      service nginx restart
+    owner: root
+    group: root
+    mode: 0744

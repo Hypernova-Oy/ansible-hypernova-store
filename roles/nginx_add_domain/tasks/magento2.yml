@@ -30,3 +30,5 @@
     owner: www-data
     group: www-data
     mode: 02775
+  notify:
+  - restart nginx

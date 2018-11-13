@@ -1,0 +1,17 @@
+---
+- name: Create a new Magento2 database
+  mysql_db:
+    name: "{{ mage2_db_name_and_user }}"
+    collation: "utf8_general_ci"
+    encoding: "utf8"
+    state: present
+
+- name: Add Magento2 user
+  mysql_user:
+    user: "{{ mage2_db_name_and_user }}"
+    password: "{{ mage2_db_passwd }}"
+    host: "{{ item }}"
+    priv: "{{ mage2_db_name_and_user }}.*:ALL"
+  no_log: mariadb_debug == false
+  changed_when: false # required for idempotence
+  with_items: "{{ mariadb_default_hosts }}"

@@ -1,0 +1,19 @@
+---
+mariadb_default_hosts:
+  - localhost
+  - 127.0.0.1
+  - ::1
+
+mariadb_debug: false
+
+# Hosts
+mariadb_admin_hosts:
+  - 127.0.0.1
+  - ::1
+  - localhost
+
+mariadb_allowed_hosts:
+  - 127.0.0.1
+  - ::1
+  - localhost
+

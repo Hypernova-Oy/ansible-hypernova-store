@@ -1,0 +1,8 @@
+---
+- name: SetUP Magento2 or WordPress
+  hosts: web
+  become: yes
+  roles:
+    - { role: nginx_add_domain, tags: [] }
+    - { role: magento2, tags: [magento2book] }
+    - { role: wordpress, tags: [wordpressbook] }

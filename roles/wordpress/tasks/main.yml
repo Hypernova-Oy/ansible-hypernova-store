@@ -1,0 +1,24 @@
+---
+- include: vars.yml
+  tags: ['always']
+
+# - include: roles/nginx_add_domain/tasks/wordpress.yml
+#   tags: ['always']
+
+# - include: install-wp-cli.yml
+#   tags: ['install-wp-cli']
+
+# - include: create-db.yml
+#   tags: ['create-db-wp']
+
+- include: install-wp.yml
+  tags: ['install-wp']
+
+# - name: Save login and password to file
+#   become: no
+#   template: 
+#     src: mysql-report.j2
+#     dest: "~/ansible_installation_reports/wordpress-{{ new_domain_name }}-report.log"
+#   delegate_to: 127.0.0.1
+#   run_once: True
+#   no_log: True

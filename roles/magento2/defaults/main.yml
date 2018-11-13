@@ -1,0 +1,27 @@
+---
+mariadb_default_hosts:
+  - localhost
+  - 127.0.0.1
+  - ::1
+
+mariadb_debug: false
+
+# Hosts
+mariadb_admin_hosts:
+  - 127.0.0.1
+  - ::1
+  - localhost
+
+mariadb_allowed_hosts:
+  - 127.0.0.1
+  - ::1
+  - localhost
+
+#https://github.com/magento/magento2/releases
+mage2release: 2.2.6
+admin_firstname: Console
+admin_lastname: Support
+admin_email: info@console.support
+language: en_US
+currency: USD
+timezone: Europe/Kiev

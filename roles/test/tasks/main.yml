@@ -1,0 +1,131 @@
+﻿---
+# - include_tasks: "roles/common/tasks/get_memory.yml"
+
+# - debug: 
+#     msg: "{{ansible_memtotal_mb}}"
+  
+# openssl rand -base64 15
+# < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-15};echo;
+
+
+# name: php-fpm.conf update
+#   lineinfile:
+#     dest: /etc/php/7.2/fpm/php-fpm.conf
+#     regexp: "{{item.regexp}}"
+#     line: "{{item.line}}"
+#     state: present
+#   with_items:
+#     - regexp: "^;?emergency_restart_threshold"
+#       line: "emergency_restart_threshold = 10"
+  
+- name: Generate random char to secure new user name and for password
+  become: no
+  delegate_to: 127.0.0.1
+  run_once: True
+  shell: "{{item.command}}"
+  register: "{{item.register}}"
+  with_items:
+    - command: "makepasswd --chars=6"
+      register: "user_six"
+    - command: "makepasswd --chars=15"
+      register: "user_mysql_pass"
+
+# - debug: 
+#     msg: "{{ user_password.stdout }} {{user_fourword.stdout}}"
+
+# - debug: 
+#     msg: "{{ user_fourword }}"
+
+
+# - name: Generate four random char to secure new user name
+#   become: no
+#   shell: "makepasswd --chars=4"
+#   register: user_fourword
+#   delegate_to: 127.0.0.1
+#   run_once: True
+#   #no_log: True
+
+
+# # - name: Set new username globally
+# #   set_fact: new_user_name_global="{{new_user_name}}{{user_fourword.stdout}}"
+# #   run_once: True
+
+# - name: Generate password for new user
+#   become: no
+#   shell: "makepasswd --chars=15"
+#   register: user_password
+#   delegate_to: 127.0.0.1
+#   run_once: True
+#   #no_log: true
+
+
+
+# - set_fact: memtotal="{{ ansible_memtotal_mb }}"
+
+#- name: incl Gathering facts on number CPUs from the new server
+#- include_tasks: "roles/common/tasks/get_memory.yml"
+  # debug: 
+  #   msg: "{{ansible_memtotal_mb}}"
+
+
+# - name: Gathering facts on number CPUs from the new server
+#   vars:
+#     memory: ansible_memtotal_mb
+#   debug: 
+#     msg: "{{ansible_memtotal_mb}}"
+  
+
+
+
+# - name: Convert first system disk into various formats
+#   debug:
+#     msg: '{{ disksize_gib }} vs {{ disksize_gib_human }}'
+#   vars:
+#     # Get first system disk
+#     disk: '{{ ansible_facts.disks|selectattr("system_disk")|first }}'
+
+#     # Show disk size in Gibibytes
+#     disksize_gib_human: '{{ disk.size|filesizeformat(True) }}'   # returns "223.6 GiB" (human readable)
+#     disksize_gib: '{{ (disk.size/1024|pow(3))|round|int }} GiB'  # returns "224 GiB" (value in GiB)
+
+#     # Show disk size in Gigabytes
+#     disksize_gb_human: '{{ disk.size|filesizeformat }}'        # returns "240.1 GB" (human readable)
+#     disksize_gb: '{{ (disk.size/1000|pow(3))|round|int }} GB'  # returns "240 GB" (value in GB)
+
+# - name: Gathering facts on number CPUs from the new server
+#   setup:
+#     filter: ansible_memtotal_mb
+#   tags: testd
+# - debug: msg="{{ansible_memtotal_mb}}"
+# - debug:
+#   - vars: ansible_memtotal_mb
+
+
+
+# - name: Collect only facts returned by facter
+#   setup:
+#     gather_subset:
+#       - '!all'
+#       - '!any'
+#       - facter
+# - debug:
+#     var: hostvars[inventory_hostname]
+
+
+# - name: get the username running the deploy
+#   become: no
+#   template: 
+#     src: test.j2 
+#     dest: "~/ansible_installation_reports/ip-login.log"
+#   delegate_to: 127.0.0.1
+#   #run_once: True
+
+
+# - name: get the username running the deploy
+#   set_fact:
+#     #ip_addr: "{{ lookup('dig', '{{ item }}' ) }}"
+#     ip_addr: "{{ item }}"
+#   with_items: "{{ inventory_hostname }}"
+# - debug:
+#     var: ip_addr
+

@@ -1,0 +1,17 @@
+{{ ansible_managed | comment(decoration="# ") }}
+
+WordPress for domain: {{new_domain_name}}
+======================================
+WP home directory: {{ wp_home }}
+Login: {{ wp_admin_user }}
+Password: {{ wp_admin_user_passwd }}
+
+http://{{new_domain_name}}
+http://{{new_domain_name}}/wp-admin/
+
+MySQL DB
+======================================
+User and DB: {{wp_db_name_and_user}}
+Password: {{ wp_db_passwd }}
+
+Date: {{ ansible_date_time.date }}

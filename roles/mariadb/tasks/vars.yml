@@ -13,7 +13,7 @@
     state: directory
     mode: 0775
   with_items:
-    - ~/ansible_users_keys
+    - ~/ansible_installation_reports
   delegate_to: 127.0.0.1
   run_once: True
 

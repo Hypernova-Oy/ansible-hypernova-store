@@ -1,0 +1,43 @@
+---
+- name: Create directory if they don't exist
+  become: no
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0775
+  with_items:
+    - ~/ansible_installation_reports
+  delegate_to: 127.0.0.1
+  run_once: True
+
+- name: Generate few random char to secure new user name
+  become: no
+  shell: "makepasswd --chars=6"
+  register: "wp_user_six"
+  delegate_to: 127.0.0.1
+  run_once: True
+  no_log: True
+
+- name: Generate password for WP administrator
+  become: no
+  shell: makepasswd --chars=15
+  register: "wp_user_pass"
+  delegate_to: 127.0.0.1
+  run_once: True
+  no_log: true
+
+- name: Generate password for WP database user
+  become: no
+  shell: makepasswd --chars=15
+  register: "wp_mysql_pass"
+  delegate_to: 127.0.0.1
+  run_once: True
+  no_log: true
+
+- name: Set WordPress facts
+  set_fact:
+    wp_home: "/var/www/{{new_domain_name}}/httpdocs"
+    wp_admin_user: "admin{{ wp_user_six.stdout }}"
+    wp_admin_user_passwd: "{{ wp_user_pass.stdout }}"
+    wp_db_passwd: "{{ wp_mysql_pass.stdout }}"
+    wp_db_name_and_user: "wp_{{new_domain_name.split('.')[0] | lower | truncate(12, True, '')}}"

@@ -1,0 +1,79 @@
+---
+- name: Create directory if they don't exist
+  become: no
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0775
+  with_items:
+    - ~/ansible_installation_reports
+  delegate_to: 127.0.0.1
+  run_once: True
+
+- name: Generate few random char to secure new user name
+  become: no
+  shell: "makepasswd --chars=6"
+  register: "mage2_user_six"
+  delegate_to: 127.0.0.1
+  run_once: True
+  no_log: True
+
+- name: Generate few random char to secure admin back-end URL
+  become: no
+  shell: "makepasswd --chars=6"
+  register: "mage2_backend"
+  delegate_to: 127.0.0.1
+  run_once: True
+  no_log: True
+
+- name: Generate password for Magento2 administrator
+  become: no
+  shell: makepasswd --chars=15
+  register: "mage2_user_pass"
+  delegate_to: 127.0.0.1
+  run_once: True
+  no_log: true
+
+- name: Generate password for rabbitmq administrator
+  become: no
+  shell: makepasswd --chars=15
+  register: "rabbitmq_user_pass"
+  delegate_to: 127.0.0.1
+  run_once: True
+  no_log: true
+
+- name: Generate few random char to secure new rabbitmq user name
+  become: no
+  shell: "makepasswd --chars=6"
+  register: "rabbitmq_user_six"
+  delegate_to: 127.0.0.1
+  run_once: True
+  no_log: True
+
+- name: Generate password for Magento2 database user
+  become: no
+  shell: makepasswd --chars=15
+  register: "mage2_mysql_pass"
+  delegate_to: 127.0.0.1
+  run_once: True
+  no_log: true
+
+- name: Set Magento2 facts
+  set_fact:
+    mage2_home: "/var/www/{{new_domain_name}}/httpdocs"
+    mage2_admin_user: "admin{{mage2_user_six.stdout|lower}}"
+    mage2_admin_user_passwd: "{{mage2_user_pass.stdout}}"
+    mage2_db_passwd: "{{mage2_mysql_pass.stdout}}"
+    backend_frontname: "{{mage2_backend.stdout|lower}}"
+    mage2_db_name_and_user: "mg_{{new_domain_name.split('.')[0] | lower | truncate(12, True, '')}}"
+    rabbitmq_user: "admin{{rabbitmq_user_six.stdout|lower}}"
+    rabbitmq_pass: "{{rabbitmq_user_pass.stdout}}"
+  
+- name: Save login and password to file
+  become: no
+  template: 
+    src: mage2-report.j2
+    dest: "~/ansible_installation_reports/magento2-{{ new_domain_name }}-report.log"
+  delegate_to: 127.0.0.1
+  run_once: True
+  no_log: True

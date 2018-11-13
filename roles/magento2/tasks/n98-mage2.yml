@@ -1,0 +1,11 @@
+---
+# n98-magerun2 --skip-core-commands sys:info
+
+- name: n98-magerun2 for Magento 2
+  get_url:
+    url: "https://files.magerun.net/n98-magerun2-latest.phar"
+    dest: "/usr/bin/n98-magerun2"
+    force: true
+    owner: root
+    group: www-data
+    mode: 0755

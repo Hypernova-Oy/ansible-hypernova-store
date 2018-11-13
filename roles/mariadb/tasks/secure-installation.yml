@@ -90,10 +90,7 @@
   become: no
   template: 
     src: mysql-users-name.j2
-    dest: "~/ansible_users_keys/mysql-{{ mariadb_admin_user }}-PMA-logins.log"
+    dest: "~/ansible_installation_reports/mysql-{{ mariadb_admin_user }}-PMA-logins.log"
   delegate_to: 127.0.0.1
   run_once: True
   no_log: True
-
-# - debug:
-#     msg: "Login {{ mariadb_admin_user }} password {{ mariadb_admin_password }}"

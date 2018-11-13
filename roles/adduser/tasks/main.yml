@@ -13,7 +13,7 @@
     state: directory
     mode: 0775
   with_items:
-    - ~/ansible_users_keys
+    - ~/ansible_installation_reports
   delegate_to: 127.0.0.1
   run_once: True
 
@@ -32,7 +32,7 @@
 - name: Generate SSH keys
   become: no
   delegate_to: 127.0.0.1
-  shell: ssh-keygen -t rsa -b 4096 -C "{{new_user_name_global}}@ansible" -f ~/ansible_users_keys/{{ new_user_name_global }}_id_rsa -q -N ""
+  shell: ssh-keygen -t rsa -b 4096 -C "{{new_user_name_global}}@ansible" -f ~/ansible_installation_reports/{{ new_user_name_global }}_id_rsa -q -N ""
   run_once: True
 
 - name: Generate password for new user
@@ -91,14 +91,14 @@
   authorized_key:
     user: "{{ new_user_name_global }}"
     state: present
-    key: "{{ lookup('file', '~/ansible_users_keys/{{ new_user_name_global }}_id_rsa.pub') }}"
+    key: "{{ lookup('file', '~/ansible_installation_reports/{{ new_user_name_global }}_id_rsa.pub') }}"
 
 - name: Save name and password to file
   become: no
   template: 
     src: users-name.j2 
-    dest: "~/ansible_users_keys/{{ new_user_name_global }}-login.log"
+    dest: "~/ansible_installation_reports/{{ new_user_name_global }}-login.log"
   delegate_to: 127.0.0.1
   run_once: True
 - debug:
-    msg: "Login {{ new_user_name_global }} password {{ user_password.stdout }} key ~/ansible_users_keys/{{ new_user_name_global }}_id_rsa.pub"
+    msg: "Login {{ new_user_name_global }} password {{ user_password.stdout }} key ~/ansible_installation_reports/{{ new_user_name_global }}_id_rsa.pub"

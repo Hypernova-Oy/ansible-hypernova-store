@@ -1,0 +1,22 @@
+{{ ansible_managed | comment(decoration="# ") }}
+
+Magento2 for domain: {{new_domain_name}}
+======================================
+Magento home directory: {{ mage2_home }}
+Login: {{ mage2_admin_user }}
+Password: {{ mage2_admin_user_passwd }}
+
+http://{{new_domain_name}}
+http://{{new_domain_name}}/admin{{backend_frontname}}/
+
+MySQL DB
+======================================
+User and DB: {{ mage2_db_name_and_user }}
+Password: {{ mage2_db_passwd }}
+
+RabbitMQ
+======================================
+User: {{rabbitmq_user}}
+Password: {{rabbitmq_pass}}
+
+Date: {{ ansible_date_time.date }}
